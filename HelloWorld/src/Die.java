@@ -12,10 +12,6 @@ public class Die {
 	}
 	public int roll() {
 	    // One line with a comment and two empty lines.
-/*
- * This is not counted 
- * 		
- */
 		
 		rolled = rand.nextInt(6) + 1 ;
 		return rolled ;
