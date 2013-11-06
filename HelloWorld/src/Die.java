@@ -1,6 +1,10 @@
 import java.util.Random ;
 // These lines don't count
-
+/*
+ * 
+ * 
+ * 
+ */
 // I hope..
 public class Die {
 	private int rolled ;

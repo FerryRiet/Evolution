@@ -34,17 +34,15 @@ void DoIt() {
 	    ASTSet  = createAstsFromEclipseProject(|project://HelloWorld| , true) ;
 	    M3Model = createM3FromEclipseProject(|project://HelloWorld|) ;	    
 
-        
 	    top-down-break visit (ASTSet) {
 	    	    case c:constructor(NAME,_,_,N) : {
 						cyclicCount = countCyclicComplexity(N) ;
-			            aresult = aresult + <NAME,calcMethodLines(M3Model,c @ decl),cyclicCount> ;
+			            aresult = aresult + <NAME,calcMethodLinesV2(M3Model,c @ decl),cyclicCount> ;
 	    	    }
 		        case m:method(_,NAME,_,_,N) : {
 		            	methodCount = methodCount + 1  ;	
 		            	cyclicCount = countCyclicComplexity(N) ;
-		            	println(m @ decl) ;
-			            aresult = aresult + <NAME,calcMethodLines(M3Model,m @ decl),cyclicCount> ;
+			            aresult = aresult + <NAME,calcMethodLinesV2(M3Model,m @ decl),cyclicCount> ;
 		        }
 	     }
 		
@@ -62,11 +60,21 @@ void DoIt() {
 
 }
 
-int calcMethodLines(M3 M3Model,loc location) {
-	    int methodLines = 0 ;
-	    methodLines = countFileEndLocV2(M3Model, location) - countFileBeginLocV2(M3Model, location) 
-	                - countEmptyLocV2(M3Model, location)   - countCommentedLocV2(M3Model, location) + 1 ;
-	    return methodLines;
+int calcMethodLinesV2(M3 M3Model,loc cu) {
+    str content = "" ;
+	int count = 0 ;
+	for ( doc <- M3Model@declarations[cu] ){
+		content = readFile(doc) ;
+	}
+	// Fase 1 remove comments
+	str p = visit(content){
+   		case /<word:\/\*(.|[\r\n])*\*\/>/ => "" 
+   		case /<word:\/\/.*>/              => "" 
+   		//case /<word:^\s*>/              => ""  // causes Rascal to loop 100%
+   	};
+   	// Fase 2 drop blank lines and finally count remaining lines
+   	count =  (0 | it + 1 | /^.*\S.*$/ <- split("\n", p ));
+	return count ;
 }
 
 int countProjectCommentedLocV2(M3 model)    = (0 | it + countCommentedLocV2(model, cu) | cu <- files(model));
@@ -75,7 +83,8 @@ int countProjectEmptyLocV2(M3 projectModel) = (0 | it + countEmptyLocV2(projectM
 
 int countCommentedLoc(M3 projectModel, loc cu)   =  (0 | it + (doc.end.line - doc.begin.line + 1 - checkForSourceLines(doc)) | doc <- projectModel@documentation[cu]); 
 int countCommentedLocV2(M3 projectModel, loc cu) = 	(0 | it + 1 | loc doc <- projectModel@declarations[cu], /^\s*\/\/.*$/ <- split("\n", readFile(doc)));
-int countEmptyLocV2(M3 projectModel, loc cu) = 	(0 | it + 1 | loc doc <- projectModel@declarations[cu], /^\s*$/ <- split("\n", removeCommentsV2(readFile(doc), projectModel, cu)));
+int countEmptyLocV2(M3 projectModel, loc cu) 
+    = 	(0 | it + 1 | loc doc <- projectModel@declarations[cu], /^\s*$/ <- split("\n", removeCommentsV2(readFile(doc), projectModel, cu)));
 
 int countFileBeginLocV2(M3 projectModel, loc cu) {
    loc src = Set::getOneFrom(projectModel@declarations[cu]) ;
@@ -87,7 +96,7 @@ int countFileEndLocV2(M3 projectModel, loc cu) {
    return src.end.line ;
 }
 
-// The nex two fuctions need a rewrite
+// TODO: The next two functions need a total rewrite
 int checkForSourceLines(loc commentLoc) {
 	str comment = readFile(commentLoc);
 	
@@ -111,11 +120,11 @@ int checkForSourceLines(loc commentLoc) {
 	return size(split(comment, trim(commentedLinesSrc)));
 }
 
+// Next function only works on a complete file not on code fragments
 str removeCommentsV2(str contents, M3 projectModel, loc cu) {
   list[str] listContents = split("\n", contents);
   list[str] result = listContents;
   for (loc commentLoc <- projectModel@documentation[cu]) {
-    // remove comments
     result = result - slice(listContents, commentLoc.begin.line - 1, commentLoc.end.line - commentLoc.begin.line + 1);
   }
   return intercalate("\n", result);

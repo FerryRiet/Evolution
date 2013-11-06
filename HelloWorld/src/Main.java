@@ -2,6 +2,9 @@
 public class Main {
 
 	public static void main(String[] args) {
+		/*
+		 * 
+		 */
 		int doo = 10 ;
 		// should count one
 		if ( doo == 10 ) {
