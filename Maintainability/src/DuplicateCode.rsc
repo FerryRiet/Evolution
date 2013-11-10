@@ -10,28 +10,78 @@ import lang::java::jdt::m3::AST;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 
-list[value] splatIt(Declaration ast) {
-	int i = 0 ;
-	list[value] splat = [ e | /Statement e <- ast ] ;
+list[Statement] splatIt(Declaration ast) {
+	list[Statement] splat = [ e | /Statement e <- ast ] ;
 	return splat ;
 }
+
 void Show(M3 M3Model,loc cu) {
 		 cu.begin.column = 0 ;	
 	     content = readFile(cu) ;
 	     println(content) ;
 }
+
 int linesOccupied(loc s) {
-	int len = 0 ;
-	len = s.end.line - s.begin.line ;
-	if ( len == 0 ) return 1 ;
-	return len;
+	return  s.end.line - s.begin.line + 1 ;
 }
-int lineListOccupied(list[Statement] stlist) {
+
+int linesListOccupied(list[Statement] stlist) {
 	int len = 0 ;
 	for (Statement st <- stlist) {
 		len += linesOccupied(st @ src) ;
 	} 
 	return len ;
+}
+
+void doItV2(set[Declaration] ASTSet, M3 M3Model) {
+   list[Statement] statiis ;
+   list[Statement] ripoff ;
+   list[Statement] p ;
+   Statement h ;
+   int listCount = 0 ;
+   int i = 1 ;
+   for ( Declaration d <- ASTSet ) {
+      statiis = splatIt(d)  ;
+      ripoff  = statiis ;
+
+	  for ( Statement h <- statiis ) {
+	  	 //p = head(ripoff) ;
+	  	 //println(p @ src) ;
+	  	 
+	  	 ripoff = drop(1,ripoff) ;
+	  	 //println(h) ;
+	  	 //println(h @ src) ;
+	  	 i = 1 ;
+	  	 if ( h in (statiis - [h]) ) { 
+	  	 		println("first match") ;
+	  	 		println(h) ;
+	  	 		println(head(ripoff,i)) ;
+	  	 		
+	  	 		p = [h] + head(ripoff,i) ;
+	  	 		println(p) ;
+	  	 		println(statiis) ;
+	  	 		dod = p := statiis ;
+	  	 		println(dod) ;
+	  	 		dod = p[0] == statiis[0] ;
+	  	 		println(dod) ;
+	  	 		dod = p[1] == statiis[1] ;
+	  	 		println(dod) ;
+	  	 		while ( p := statiis  ) {
+	  	 			println("Am i here (nope)") ;
+	  	 			i+= 1 ;
+	  	 			p = [h] + head(ripoff,i) ;
+	  	 		}
+	  	 		return ;
+	  	 		//println([h] + [head(ripoff,i-1)]) ;
+	  	 		
+          		//print(linesOccupied(h @ src) );
+          		//print(" lines duplicate :") ;
+          		//println(h) ;
+          		//Show(M3Model,h @ src) ;
+	  	  }
+	  }
+	  return ;
+   } 
 }
 
 void doIt(set[Declaration] ASTSet, M3 M3Model) {
@@ -41,7 +91,6 @@ void doIt(set[Declaration] ASTSet, M3 M3Model) {
    int i = 0 ;
    for ( Declaration d <- ASTSet ) {
    		statiis = splatIt(d)  ;
-   		ripoff  = statiis ;
           for ( Statement s <- statiis ) {
           	li = statiis - s ;
           	if ( linesOccupied(s @ src) > 6 && s in li ) {
@@ -60,5 +109,5 @@ void findDuplicates() {
   M3  M3Model ;
   ASTSet  = createAstsFromEclipseProject(|project://Simple1| ,true) ;
   M3Model = createM3FromEclipseProject(|project://Simple1|) ;      
-  doIt(ASTSet,M3Model) ;    
+  doItV2(ASTSet,M3Model) ;    
 }
