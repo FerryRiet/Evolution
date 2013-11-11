@@ -10,7 +10,7 @@ import Set;
 import lang::java::jdt::m3::Core;
 
 int countCyclicComplexity(Statement M) {
-      int cyclic = 0 ;
+      int cyclic = 1 ;
       visit (M) {
             case \if(_,_)      : cyclic += 1 ;
             case \if(_,_,_)    : cyclic += 1 ; // includes else

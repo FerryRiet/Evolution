@@ -14,6 +14,11 @@ list[Statement] splatIt(Declaration ast) {
 	list[Statement] splat = [ e | /Statement e <- ast ] ;
 	return splat ;
 }
+void showModelList(M3 M3Model, list[Statement] stmntList) {
+	for ( Statement h <- stmntList) {
+		Show(M3Model,h @src) ;
+	}
+}
 
 void Show(M3 M3Model,loc cu) {
 		 cu.begin.column = 0 ;	
@@ -32,56 +37,51 @@ int linesListOccupied(list[Statement] stlist) {
 	} 
 	return len ;
 }
-
+int findOccurances(list[Statement] fragment, list[Statement] alls) {
+	int ocs = 0 ;
+	iprintln(fragment) ;
+	for ( [*_,*fragment,*_] := alls ) {
+			ocs += 1;
+	}
+	return ocs ;
+}
 void doItV2(set[Declaration] ASTSet, M3 M3Model) {
    list[Statement] statiis ;
    list[Statement] ripoff ;
    list[Statement] p ;
-   Statement h ;
+ 
    int listCount = 0 ;
    int i = 1 ;
+
    for ( Declaration d <- ASTSet ) {
       statiis = splatIt(d)  ;
       ripoff  = statiis ;
 
 	  for ( Statement h <- statiis ) {
-	  	 //p = head(ripoff) ;
-	  	 //println(p @ src) ;
-	  	 
 	  	 ripoff = drop(1,ripoff) ;
-	  	 //println(h) ;
-	  	 //println(h @ src) ;
 	  	 i = 1 ;
 	  	 if ( h in (statiis - [h]) ) { 
-	  	 		println("first match") ;
-	  	 		println(h) ;
-	  	 		println(head(ripoff,i)) ;
+	  	 		//println(findOccurances([h],statiis)) ;
+	  	 		//Show(M3Model,h @src) ;
+	  	 		//p = [h] + head(ripoff,i) ;
 	  	 		
-	  	 		p = [h] + head(ripoff,i) ;
-	  	 		println(p) ;
-	  	 		println(statiis) ;
-	  	 		dod = p := statiis ;
-	  	 		println(dod) ;
-	  	 		dod = p[0] == statiis[0] ;
-	  	 		println(dod) ;
-	  	 		dod = p[1] == statiis[1] ;
-	  	 		println(dod) ;
-	  	 		while ( p := statiis  ) {
-	  	 			println("Am i here (nope)") ;
+	  	 		//println(findOccurances(p,statiis)) ;
+	  	 		//showModelList(M3Model,p) ;
+	  	 		p = [h] ;
+	  	 		while ( findOccurances(p,statiis) >= 2 ) {
 	  	 			i+= 1 ;
-	  	 			p = [h] + head(ripoff,i) ;
+	  	 			if ( size(ripoff) > i ) {
+	  	 				p = [h] + head(ripoff,i) ;
+	  	 			}
+	  	 			else break ;
 	  	 		}
-	  	 		return ;
-	  	 		//println([h] + [head(ripoff,i-1)]) ;
-	  	 		
-          		//print(linesOccupied(h @ src) );
-          		//print(" lines duplicate :") ;
-          		//println(h) ;
-          		//Show(M3Model,h @ src) ;
+	  	 		print("Duplicates :") ;
+	  	 		showModelList(M3Model,head(p,i-1)) ;
 	  	  }
 	  }
 	  return ;
    } 
+   
 }
 
 void doIt(set[Declaration] ASTSet, M3 M3Model) {
@@ -93,7 +93,7 @@ void doIt(set[Declaration] ASTSet, M3 M3Model) {
    		statiis = splatIt(d)  ;
           for ( Statement s <- statiis ) {
           	li = statiis - s ;
-          	if ( linesOccupied(s @ src) > 6 && s in li ) {
+          	if ( linesOccupied(s @ src) >= 6 && s in li ) {
           		print(linesOccupied(s @ src) );
           		print(" lines duplicate :") ;
           		println(s) ;
@@ -111,3 +111,15 @@ void findDuplicates() {
   M3Model = createM3FromEclipseProject(|project://Simple1|) ;      
   doItV2(ASTSet,M3Model) ;    
 }
+
+int testIt() {
+	list[int] m = [1,2,3,4,5,6,3,4,9] ;
+	list[int] s = [4,9] ;
+	
+	// p = [*L] + s ;
+	for( [*_,*s,*_]  := m) {
+		println("match" ) ;
+	}
+	return 1 ;
+}
+	
