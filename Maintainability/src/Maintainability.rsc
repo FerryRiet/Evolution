@@ -75,13 +75,19 @@ void DoIt() {
       } 
       int lowLines = 0 ;
       int midLines = 0 ;
-      iprintln(aresult) ;
+      int complexLines = 0 ;
+      int untestableLines = 0 ;
+      if (debug) 
+           iprintln(aresult) ;
+      
       for ( tuple[str name,loc location ,int lines,int ccomplexity] mresult <- aresult ) {
       		if ( mresult.ccomplexity <= 10 ) lowLines += mresult.lines ;
       		else if ( mresult.ccomplexity >  10  && mresult.ccomplexity <= 20 ) midLines +=  mresult.lines ;
+      		else if ( mresult.ccomplexity >  21  && mresult.ccomplexity <= 50 ) complexLines +=  mresult.lines ;
+      		else if ( mresult.ccomplexity >  50 ) { untestableLines +=  mresult.lines ; iprintln(mresult.location) ; } 
       }
-      println("Lowcomplexity code <lowLines> lines , midieum complecitycode <midLines> lines ") ;
-      
+      print("Low complexity code <lowLines> lines , medium complecity code <midLines> lines ,") ;
+      println("complex code <complexLines> lines , untestable code <untestableLines> lines ") ;
 }
 
 
