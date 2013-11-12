@@ -13,15 +13,21 @@ public class Main {
 		*******************************************************************************/
 
 		int doo = 10 ;
+		
+		String killThemBegin = " /*   " ;
+		String killThemEnd   = " */   " ;
+		String killLineComment = " // " ;
+		
+		
 		// should count one
 		if ( doo == 10 ) {
 			System.out.println("do == 10");
 		}
 		
-		else {
+		else { /* test remove me*/ doo = 10 ;
 			System.out.println("do == 10");			
 		}
-		//new Main().printIt("Hello world!\n");
+		new Main().printIt("Hello world!\n");
 		
 	}
 //	public int printIt(String message) {

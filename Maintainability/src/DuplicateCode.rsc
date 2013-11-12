@@ -39,7 +39,7 @@ int linesListOccupied(list[Statement] stlist) {
 }
 int findOccurances(list[Statement] fragment, list[Statement] alls) {
 	int ocs = 0 ;
-	iprintln(fragment) ;
+	//iprintln(fragment) ;
 	for ( [*_,*fragment,*_] := alls ) {
 			ocs += 1;
 	}
@@ -103,7 +103,7 @@ void doIt(set[Declaration] ASTSet, M3 M3Model) {
           return ;
    } 
 }
-
+// Note to self in smallsql0 file TestOrderBy.java contains multiple clones.
 void findDuplicates() {
   set[Declaration] ASTSet = {} ;  
   M3  M3Model ;
@@ -111,15 +111,3 @@ void findDuplicates() {
   M3Model = createM3FromEclipseProject(|project://Simple1|) ;      
   doItV2(ASTSet,M3Model) ;    
 }
-
-int testIt() {
-	list[int] m = [1,2,3,4,5,6,3,4,9] ;
-	list[int] s = [4,9] ;
-	
-	// p = [*L] + s ;
-	for( [*_,*s,*_]  := m) {
-		println("match" ) ;
-	}
-	return 1 ;
-}
-	
