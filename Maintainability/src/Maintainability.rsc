@@ -31,8 +31,8 @@ void DoIt() {
          
       list[tuple[str name,loc location ,int lines,int ccomplexity]] aresult = [] ; // <Name, location, lines, complexity>
 
-      ASTSet  = createAstsFromEclipseProject(|project://smallsql0| , true) ;
-      M3Model = createM3FromEclipseProject(|project://smallsql0|) ;          
+      ASTSet  = createAstsFromEclipseProject(|project://smallsql0.21_src| , true) ;
+      M3Model = createM3FromEclipseProject(|project://smallsql0.21_src|) ;          
 
       top-down-break visit (ASTSet) {
                case c:constructor(NAME,_,_,N) : {
@@ -84,7 +84,7 @@ void DoIt() {
       		if ( mresult.ccomplexity <= 10 ) lowLines += mresult.lines ;
       		else if ( mresult.ccomplexity >  10  && mresult.ccomplexity <= 20 ) midLines +=  mresult.lines ;
       		else if ( mresult.ccomplexity >  21  && mresult.ccomplexity <= 50 ) complexLines +=  mresult.lines ;
-      		else if ( mresult.ccomplexity >  50 ) { untestableLines +=  mresult.lines ; iprintln(mresult.location) ; } 
+      		else if ( mresult.ccomplexity >  50 ) { untestableLines +=  mresult.lines ; iprintln(mresult) ; } 
       }
       print("Low complexity code <lowLines> lines , medium complecity code <midLines> lines ,") ;
       println("complex code <complexLines> lines , untestable code <untestableLines> lines ") ;

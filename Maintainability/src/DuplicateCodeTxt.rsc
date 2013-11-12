@@ -10,6 +10,8 @@ import lang::java::jdt::m3::AST;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 
+import KMP ;
+
 list[Statement] splatIt(Declaration ast) {
 	list[Statement] splat = [ e | /Statement e <- ast ] ;
 	return splat ;
@@ -39,10 +41,11 @@ int linesListOccupied(list[Statement] stlist) {
 }
 int findOccurances(list[str] fragment, list[str] alls) {
 	int ocs = 0 ;
-	//iprintln(fragment) ;
-	for ( [*_,*fragment,*_] := alls ) {
-			ocs += 1;
-	}
+//	iprintln(fragment) ;
+//	for ( [*_,*fragment,*_] := alls ) {
+//			ocs += 1;
+//	}
+	ocs = size(KMPallMatches(alls,fragment)) ;
 	return ocs ;
 }
 
@@ -66,19 +69,25 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 			iprintln(fileContent) ;
 		
 		allCode += fileContent ;
+		println(i) ; i +=1 ;
 	} 
 	//debug = true ;
 	if (debug) 
 		iprint(allCode) ;
 	ripoff = allCode ;
 	workingSet = allCode ;
+	int live = 0 ;
 	for ( str oneLine <- allCode ) {
+	    live = live + 1;
+	    print(".") ;
 	  	ripoff = drop(1,ripoff) ;
 	  	cutAgain = true ;
 	  	while ( cutAgain ) {
 	  		i = 1 ;
 		  	cutAgain = false ;
+		  	print("-") ;
 	  		if ( oneLine in (workingSet - [oneLine]) ) { 
+	  		    print(";") ;
 	  	 		p = [oneLine] ;
 	  	 		while ( findOccurances(p,workingSet) >= 2 ) {
 	  	 			i+= 1 ;
@@ -88,18 +97,19 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 	  	 			else break ;
 	  	 		}
 	  	 		if ( size(head(p,i-1)) >= 6 )  {
-	  	 			print("Duplicates :") ;
-	  	 			showSource(workingSet) ;
+	  	 			if ( debug ) print("Duplicates :") ;
+	  	 			if ( debug ) showSource(workingSet) ;
 	  	 			x = head(p,i);
 	  	 			if ([*L , x , *M , x , *R ] := workingSet)
 						workingSet = L + x + M + R; 
-	  	 			showSource(head(p,i)) ;
-	  	 			showSource(workingSet) ;
+	  	 			if ( debug == false ) showSource(head(p,i)) ;
+	  	 			if ( debug ) showSource(workingSet) ;
 	  	 			cutAgain = true ;
 	  	 		}			
 	  	  	}
 	  	}
 	  }
+	  println(size(allCode) - size(workingSet) ) ;
 	  return ;
 }
 
@@ -107,7 +117,7 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 void findDuplicatesV2() {
   set[Declaration] ASTSet = {} ;  
   M3  M3Model ;
-  ASTSet  = createAstsFromEclipseProject(|project://Simple1| ,true) ;
-  M3Model = createM3FromEclipseProject(|project://Simple1|) ;      
+  //ASTSet  = createAstsFromEclipseProject(|project://Simple1| ,true) ;
+  M3Model = createM3FromEclipseProject(|project://smallsql0.21_src|) ;      
   doItV2(ASTSet,M3Model) ;    
 }

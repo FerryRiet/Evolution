@@ -27,7 +27,6 @@ public class Main {
 		else { /* test remove me*/ doo = 10 ;
 			System.out.println("do == 10");			
 		}
-		new Main().printIt("Hello world!\n");
 		
 	}
 //	public int printIt(String message) {
