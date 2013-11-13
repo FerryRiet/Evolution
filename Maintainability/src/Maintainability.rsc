@@ -8,6 +8,7 @@ import String;
 import List;
 import Set;
 import lang::java::jdt::m3::Core;
+import util::Math;
 
 int countCyclicComplexity(Statement M) {
       int cyclic = 1 ;
@@ -25,14 +26,14 @@ int countCyclicComplexity(Statement M) {
       return cyclic ;
 }
 
-void DoIt() {
+void Analyze(loc location) {
       int cyclicCount = 0 ;
       int methodCount = 0 ; // Used for debugging only
          
       list[tuple[str name,loc location ,int lines,int ccomplexity]] aresult = [] ; // <Name, location, lines, complexity>
 
-      ASTSet  = createAstsFromEclipseProject(|project://smallsql0.21_src| , true) ;
-      M3Model = createM3FromEclipseProject(|project://smallsql0.21_src|) ;          
+      ASTSet  = createAstsFromEclipseProject(location , true) ;
+      M3Model = createM3FromEclipseProject(location) ;          
 
       top-down-break visit (ASTSet) {
                case c:constructor(NAME,_,_,N) : {
@@ -57,7 +58,7 @@ void DoIt() {
       println(" Effective lines: <effectiveLinesOfCode>");
       println(" Total number of methods : <methodCount>") ;
 
-      print(" MYTB: ");
+      print(" Manyear to build: ");
       if(effectiveLinesOfCode <= 66000) {
         println("(0-8) ++");
       }
@@ -84,10 +85,26 @@ void DoIt() {
       		if ( mresult.ccomplexity <= 10 ) lowLines += mresult.lines ;
       		else if ( mresult.ccomplexity >  10  && mresult.ccomplexity <= 20 ) midLines +=  mresult.lines ;
       		else if ( mresult.ccomplexity >  21  && mresult.ccomplexity <= 50 ) complexLines +=  mresult.lines ;
-      		else if ( mresult.ccomplexity >  50 ) { untestableLines +=  mresult.lines ; iprintln(mresult) ; } 
+      		else if ( mresult.ccomplexity >  50 ) { untestableLines +=  mresult.lines ; } 
       }
-      print("Low complexity code <lowLines> lines , medium complecity code <midLines> lines ,") ;
-      println("complex code <complexLines> lines , untestable code <untestableLines> lines ") ;
+      int totalUnitLines = 0 ;
+      totalUnitLines = lowLines + midLines + complexLines + untestableLines ;
+      
+      real lowPerc = toReal(lowLines) / toReal(totalUnitLines) ;
+      real midPerc = toReal(midLines) / toReal(totalUnitLines) ;
+      real comPerc = toReal(complexLines) / toReal(totalUnitLines) ;
+      real untPerc = toReal(untestableLines) / toReal(totalUnitLines) ;
+
+      println("----------------------- Complexity results --------------------------");
+       
+      print  (" Low complexity code nr of lines : <lowLines> \n Medium complecity code nr of lines : <midLines>\n") ;
+      println(" Nr of complex code lines : <complexLines> \n Nr of untestable code lines : <untestableLines>") ;
+      println("\n Total nr of executable unit lines : <lowLines + midLines + complexLines + untestableLines>  \n") ;
+
+	  print  (" Low complexity code <round(lowPerc * 100.0) > % Mid complexity code <round(midPerc * 100.0) > % " ) ;
+	  println("Complex code <round(comPerc * 100.0)> % Untestable code <round(untPerc * 100.0)> %" ) ;
+	  
+
 }
 
 
@@ -139,3 +156,5 @@ int countFileEndLocV2(M3 projectModel, loc cu) {
    loc src = Set::getOneFrom(projectModel@declarations[cu]) ;
    return src.end.line ;
 }
+
+//|project://smallsql0.21_src|

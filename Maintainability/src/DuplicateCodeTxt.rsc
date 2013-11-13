@@ -9,6 +9,7 @@ import analysis::m3::Core;
 import lang::java::jdt::m3::AST;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
+import util::Math;
 
 import KMP ;
 
@@ -39,12 +40,16 @@ int linesListOccupied(list[Statement] stlist) {
 	} 
 	return len ;
 }
-int findOccurances(list[str] fragment, list[str] alls) {
+int findOccurancesV0(list[str] fragment, list[str] alls) {
 	int ocs = 0 ;
-//	iprintln(fragment) ;
-//	for ( [*_,*fragment,*_] := alls ) {
-//			ocs += 1;
-//	}
+  	for ( [*_,*fragment,*_] := alls ) {
+			ocs += 1;
+	}
+	ocs = size(KMPallMatches(alls,fragment)) ;
+	return ocs ;
+}
+int findOccurancesV0(list[str] fragment, list[str] alls) {
+	int ocs = 0 ;
 	ocs = size(KMPallMatches(alls,fragment)) ;
 	return ocs ;
 }
@@ -69,16 +74,14 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 			iprintln(fileContent) ;
 		
 		allCode += fileContent ;
-		println(i) ; i +=1 ;
+//		println(i) ; i +=1 ;
 	} 
 	//debug = true ;
 	if (debug) 
 		iprint(allCode) ;
 	ripoff = allCode ;
 	workingSet = allCode ;
-	int live = 0 ;
 	for ( str oneLine <- allCode ) {
-	    live = live + 1;
 	    print(".") ;
 	  	ripoff = drop(1,ripoff) ;
 	  	cutAgain = true ;
@@ -87,28 +90,35 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 		  	cutAgain = false ;
 		  	print("-") ;
 	  		if ( findOccurances([oneLine],workingSet) >= 2 ) { 
-	  	 		p = [oneLine] ;
+	  			print(";") ;
+	  	 		p = [oneLine] + head(ripoff,i) ;
+	  	 		i += 1 ;
 	  	 		while ( findOccurances(p,workingSet) >= 2 ) {
 	  	 			i+= 1 ;
-	  	 			if ( size(ripoff) > i ) {
+	  	 			//if ( size(ripoff) > i ) {
 	  	 				p = [oneLine] + head(ripoff,i) ;
-	  	 			}
-	  	 			else break ;
+	  	 			//}
+	  	 			//else break ;
 	  	 		}
 	  	 		if ( i-1 >= 6 )  {
+	  	 			print("x") ;
 	  	 			if ( debug ) print("Duplicates :") ;
 	  	 			if ( debug ) showSource(workingSet) ;
 	  	 			x = head(p,i);
 	  	 			if ([*L , x , *M , x , *R ] := workingSet)
 						workingSet = L + x + M + R; 
-	  	 			if ( debug == false ) showSource(head(p,i)) ;
+	  	 			if ( debug ) showSource(head(p,i)) ;
 	  	 			if ( debug ) showSource(workingSet) ;
 	  	 			cutAgain = true ;
 	  	 		}			
 	  	  	}
 	  	}
 	  }
-	  println(size(allCode) - size(workingSet) ) ;
+	  real allS = toReal(size(allCode)) ;
+	  real WS = toReal(size(workingSet)) ;
+	  
+	  println("\nPercentage code duplication: <(allS - WS)/allS>") ;
+	  println("e.g. <size(allCode) - size(workingSet)> lines duplicated." ) ;
 	  return ;
 }
 
