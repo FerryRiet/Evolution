@@ -83,14 +83,15 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 		  	print("-") ;
 	  		if ( oneLine in (workingSet - [oneLine]) ) { 
 	  		    print(";") ;
-	  	 		p = [oneLine] ;
-	  	 		while ( findOccurances(p,workingSet) >= 2 ) {
-	  	 			i+= 1 ;
+	  	 		// p = [oneLine]	 ;
+	  	 		do {
+	  	 			//i+= 1 ;
 	  	 			if ( size(ripoff) > i ) {
 	  	 				p = [oneLine] + head(ripoff,i) ;
 	  	 			}
 	  	 			else break ;
-	  	 		}
+	  	 			i += 1 ;
+	  	 		} while ( findOccurances(p,workingSet) >= 2 ) ;
 	  	 		if ( size(head(p,i-1)) >= 6 )  {
 	  	 			if ( debug ) print("Duplicates :") ;
 	  	 			if ( debug ) showSource(workingSet) ;
