@@ -71,14 +71,9 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 		allCode += fileContent ;
 		println(i) ; i +=1 ;
 	} 
-	//debug = true ;
-	if (debug) 
-		iprint(allCode) ;
 	ripoff = allCode ;
 	workingSet = allCode ;
-	int live = 0 ;
 	for ( str oneLine <- allCode ) {
-	    live = live + 1;
 	    print(".") ;
 	  	ripoff = drop(1,ripoff) ;
 	  	cutAgain = true ;
