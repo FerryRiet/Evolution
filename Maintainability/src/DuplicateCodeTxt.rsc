@@ -71,9 +71,14 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 		allCode += fileContent ;
 		println(i) ; i +=1 ;
 	} 
+	//debug = true ;
+	if (debug) 
+		iprint(allCode) ;
 	ripoff = allCode ;
 	workingSet = allCode ;
+	int live = 0 ;
 	for ( str oneLine <- allCode ) {
+	    live = live + 1;
 	    print(".") ;
 	  	ripoff = drop(1,ripoff) ;
 	  	cutAgain = true ;
@@ -81,18 +86,16 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 	  		i = 1 ;
 		  	cutAgain = false ;
 		  	print("-") ;
-	  		if ( oneLine in (workingSet - [oneLine]) ) { 
-	  		    print(";") ;
-	  	 		// p = [oneLine]	 ;
-	  	 		do {
-	  	 			//i+= 1 ;
+	  		if ( findOccurances([oneLine],workingSet) >= 2 ) { 
+	  	 		p = [oneLine] ;
+	  	 		while ( findOccurances(p,workingSet) >= 2 ) {
+	  	 			i+= 1 ;
 	  	 			if ( size(ripoff) > i ) {
 	  	 				p = [oneLine] + head(ripoff,i) ;
 	  	 			}
 	  	 			else break ;
-	  	 			i += 1 ;
-	  	 		} while ( findOccurances(p,workingSet) >= 2 ) ;
-	  	 		if ( size(head(p,i-1)) >= 6 )  {
+	  	 		}
+	  	 		if ( i-1 >= 6 )  {
 	  	 			if ( debug ) print("Duplicates :") ;
 	  	 			if ( debug ) showSource(workingSet) ;
 	  	 			x = head(p,i);
@@ -110,10 +113,10 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 }
 
 // Note to self in smallsql0 file TestOrderBy.java contains multiple clones.
-void findDuplicatesV2() {
+void findDuplicatesV2(loc location) {
   set[Declaration] ASTSet = {} ;  
   M3  M3Model ;
   //ASTSet  = createAstsFromEclipseProject(|project://Simple1| ,true) ;
-  M3Model = createM3FromEclipseProject(|project://smallsql0.21_src|) ;      
+  M3Model = createM3FromEclipseProject(location) ;      
   doItV2(ASTSet,M3Model) ;    
 }
