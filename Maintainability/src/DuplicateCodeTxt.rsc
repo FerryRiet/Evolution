@@ -87,7 +87,7 @@ void dumpToFile(loc location, list[str] d) {
     }
 }
 
-void doItWork(set[Declaration] ASTSet, M3 M3Model) {
+int doItWork(M3 M3Model) {
     list[str] allCode = [""];
     list[str] all2Code = [];
     list[str] ripoff ;
@@ -146,6 +146,8 @@ void doItWork(set[Declaration] ASTSet, M3 M3Model) {
   
      println("\nPercentage code duplication: <round(((allS - WS)/allS) * 100.0)>%") ;
      println("e.g. <size(allCode) - size(workingSet)> lines duplicated." ) ;
+     
+     return toInt(round(((allS - WS)/allS) * 100.0)) ;
 }
 
 void doItV2(set[Declaration] ASTSet, M3 M3Model) {
@@ -198,10 +200,6 @@ void doItV2(set[Declaration] ASTSet, M3 M3Model) {
 }
 
 // Note to self in smallsql0 file TestOrderBy.java contains multiple clones.
-void findDuplicatesV2(loc location) {
-    set[Declaration] ASTSet = {} ;  
-    M3  M3Model ;
-    //ASTSet  = createAstsFromEclipseProject(|project://Simple1| ,true) ;
-    M3Model = createM3FromEclipseProject(location) ;      
-    doItWork(ASTSet,M3Model) ;    
+int findDuplicatesV2(M3 M3Model) {
+    return doItWork(M3Model) ;    
 }
