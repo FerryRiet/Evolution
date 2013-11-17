@@ -104,16 +104,18 @@ int doItWork(M3 M3Model) {
     } 
 	
     dumpToFile(|file:///Users/ferryrietveld/data.code|, allCode) ;
-	println("Checking <size(allCode)> lines" ) ;
+	if ( debug ) 
+		println("Checking <size(allCode)> lines" ) ;
     
     ripoff = allCode ;
     workingSet = allCode ;
 
 	for ( str oneLine <- allCode ) {
-		print(".") ;
-   	    if ( lineCount % 10 == 0 ) println("<lineCount>") ;
-		lineCount += 1 ;
-			    		    
+		if ( debug ) { 
+			print(".") ;
+	   	    if ( lineCount % 10 == 0 ) println("<lineCount>") ;
+			lineCount += 1 ;
+		}	    		    
         ripoff = drop(1,ripoff) ;
         cutAgain = true ;
 	    while ( cutAgain ) {
@@ -131,7 +133,7 @@ int doItWork(M3 M3Model) {
 
                   if ( i-1 >= 6 )  {
 	                  x = head(p,i);
-	                  print("x(<size(x)>)") ;
+	                  if ( debug ) print("x(<size(x)>)") ;
 		              if ([*L , x , *M , x , *R ] := workingSet) {
 	                     workingSet = L + x + M + R; 
 	    		      	 cutAgain = true ;
@@ -142,11 +144,12 @@ int doItWork(M3 M3Model) {
      }
      real allS = toReal(size(allCode)) ;
      real WS = toReal(size(workingSet)) ;
-     dumpToFile(|file:///Users/ferryrietveld/data.after|, workingSet) ;
-  
-     println("\nPercentage code duplication: <round(((allS - WS)/allS) * 100.0)>%") ;
-     println("e.g. <size(allCode) - size(workingSet)> lines duplicated." ) ;
      
+     if ( debug ) {
+		 dumpToFile(|file:///Users/ferryrietveld/data.after|, workingSet) ;
+		 println("\nPercentage code duplication: <round(((allS - WS)/allS) * 100.0)>%") ;
+		 println("e.g. <size(allCode) - size(workingSet)> lines duplicated." ) ;
+     }
      return toInt(round(((allS - WS)/allS) * 100.0)) ;
 }
 

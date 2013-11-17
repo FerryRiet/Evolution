@@ -62,29 +62,16 @@ void AnalyzeV1(loc location) {
       
       effectiveLinesOfCode = countEffectiveLocV2(M3Model)  ;
       
-      println("======================= Metrics: lines ==============================");
+      println("=========================== Metrics: Lines ===================================================");
       println("Lines of Code");
       println(" Total: <totalLines>");
       println(" Total White lines: <totalEmptyLines>");
       println(" Effective lines: <effectiveLinesOfCode>");
       println(" Total number of methods : <methodCount>") ;
 
-      print(" Manyear to build: ");
-      if(effectiveLinesOfCode <= 66000) {
-        println("(0-8) ++");
-      }
-      else if (effectLinesOfCode > 66000 && effectLinesOfCode<=246000) {
-        println("(8-30) +");
-      }
-      else if(effectLinesOfCode > 246000 && effectLinesOfCode<=665000) {
-        println("(30-80) o");
-      }
-      else if(effectLinesOfCode > 665000 && effectLinesOfCode<=1310000) {
-        println("(80-160) -");
-      }
-      else if(effectLinesOfCode > 1310000) {
-          println("(\>160) --");
-      } 
+      println(" Volume score: <getVolumeRanking(effectiveLinesOfCode)>\n");
+      
+      
       int lowLines = 0 ;
       int midLines = 0 ;
       int complexLines = 0 ;
@@ -120,7 +107,7 @@ void AnalyzeV1(loc location) {
       int comPerc = (complexLines * 100) / totalUnitLines ;
       int untPerc = (untestableLines * 100) / totalUnitLines ;
 
-      println("----------------------- Metrics : Complexity --------------------------");
+      println("--------------------------- Metrics : Complexity ---------------------------------------------");
        
       print  (" Low complexity code nr of lines : <lowLines> \n Medium complecity code nr of lines : <midLines>\n") ;
       println(" Nr of complex code lines : <complexLines> \n Nr of untestable code lines : <untestableLines>") ;
@@ -131,24 +118,28 @@ void AnalyzeV1(loc location) {
 
 	  
 	  complexityRanking = getRanking(untPerc, comPerc, midPerc) ;
-	  println(" Complexity score :<complexityRanking>." ) ;
+	  println("\n Complexity score <complexityRanking> ." ) ;
 	  
 	  
-      println("----------------------- Metrics : Unit size --------------------------");
+      println("--------------------------- Metrics : Unit size ----------------------------------------------");
 	  
 	  
 	  unitRanking = getRanking((unit100plus *100)/methodCount, (unit100plus *100)/methodCount, (unit100plus *100)/methodCount) ;
-	  println(" Unit size score <unitRanking>." ) ;
+	  println("\n Unit size score <unitRanking> ." ) ;
 		 	
+      println("--------------------------- Metrics : Duplicate code -----------------------------------------");
+
+
 	  dupRanking = rankDuplicates(findDuplicatesV2(M3Model))  ;
 
+      println("--------------------------- Metrics : Unit tests ---------------------------------------------");
 
 	  println("AssertCount <assertStatements> ") ;
 	  testRanking = "o" ;
 
       
-      println("------------------------- End report: Sig Maintainability model ----------------------------");
-	  println("\t\tVolume\tComplexity\tDuplications\tUnit size\tUnit tests\tSIG MI") ;
+      println("--------------------------- End report: Sig Maintainability model ----------------------------");
+	  println("\n\t\tVolume\tComplexity\tDuplications\tUnit size\tUnit tests\tSIG MI") ;
 	  
 	  rAvg = rankingAvg([getVolumeRanking(effectiveLinesOfCode),dupRanking,unitRanking,testRanking]) ;
 	  println("Analysability\t<getVolumeRanking(effectiveLinesOfCode)>\t  \t\t<dupRanking>\t\t<unitRanking>\t\t<testRanking>\t\t<rAvg>" ) ;
