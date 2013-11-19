@@ -56,7 +56,7 @@ list[tuple[str name,loc location ,int lines,int ccomplexity,int assertCount]] ge
 void AnalyzeV1(loc location) {
       tuple[int complexity, int assertCount] cyclicCount ;
       
-      int methodCount = 0 ; 
+      int methodCount = 0 ;
          
       list[tuple[str name,loc location ,int lines,int ccomplexity,int assertCount]] aresult = [] ; // <Name, location, lines, complexity>
 
@@ -140,8 +140,8 @@ void AnalyzeV1(loc location) {
 		 	
       println("--------------------------- Metrics : Duplicate code -----------------------------------------");
 
-      dupScore = findDuplicatesV2(M3Model) ;
-	  //dupScore= 3  ;
+      //dupScore = findDuplicatesV2(M3Model) ;
+	  dupScore= 3  ;
 	  dupRanking = rankDuplicates(dupScore)  ;
 	  println("\n Percentage duplicated code <dupScore>%  ." ) ;
 	  println(" Duplicated code ranking <dupRanking> ." ) ;
@@ -313,10 +313,6 @@ int countFileEndLocV2(M3 projectModel, loc cu) {
 //Changeability	  	--		++		  		  		o
 //Stability	  	  		  		  		o		o
 //Testability	  	--		  		-		o		-
-
-
-
-
 
 
 
