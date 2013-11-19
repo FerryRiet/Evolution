@@ -2,7 +2,7 @@ module KMP
 import IO ;
 import List;
 
-// Knuth, Donald; Morris, James H., jr; Pratt, Vaughan (1977). "Fast pattern matching in strings". 
+// Adopted: Knuth, Donald; Morris, James H., jr; Pratt, Vaughan (1977). "Fast pattern matching in strings". 
 // SIAM Journal on Computing 6 (2): 323–350. doi:10.1137/0206024. Zbl 0372.68005.
 
 // Sometimes Rascal needs a lot of code B^}

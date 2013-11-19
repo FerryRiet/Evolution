@@ -23,40 +23,47 @@ tuple[int complexity, int assertCount] countCyclicComplexity(Statement M) {
             case \if(_,_,_)          : cyclic += 1 ; // includes else
             case \case(_)            : cyclic += 1 ;
             case \while(_,_)         : cyclic += 1 ;
-            case \do(_,_)            : cyclic += 1 ;
+            case \do(_,_)            : cyclic += 1 ; // path back to start discusion point.
             case \for(_,_,_,_)       : cyclic += 1 ;
-            case \try(_,_)           : cyclic += 1 ;
-            case \try(_,_,_)         : cyclic += 1 ; // Includes finally 
+            case \foreach(_,_,_)     : cyclic += 1 ;
+//            case \try(_,_)           : cyclic += 0 ;
+//            case \try(_,_,_)         : cyclic += 0 ; // Includes finally 
             case \catch(_,_)         : cyclic += 1 ; 
-            case \conditional(_,_,_) : cyclic += 1 ; 
+            case \conditional(_,_,_) : cyclic += 1 ;   //  if then else
             case \assert(_)          : assertCount += 1 ;
             case \assert(_,_)        : assertCount += 1 ;
       }
       return <cyclic,assertCount> ;
 }
 
+list[tuple[str name,loc location ,int lines,int ccomplexity,int assertCount]] getCyclic(M3 M3Model, set[Declaration] ASTset) {
+	list[tuple[str name,loc location ,int lines,int ccomplexity,int assertCount]] aresult = [] ; // <Name, location, lines, complexity>
+    tuple[int complexity,int assertCount] cyclicCount ;
+    top-down-break visit (ASTset) {
+           case c:constructor(NAME,_,_,N) : {
+                  cyclicCount = countCyclicComplexity(N) ;
+                  aresult = aresult + <NAME,c @ decl,calcMethodLinesV2(M3Model,c @ decl),cyclicCount.complexity,cyclicCount.assertCount> ;
+           }
+           case m:method(_,NAME,_,_,N) : {
+                  cyclicCount = countCyclicComplexity(N) ;
+                  aresult = aresult + <NAME,m @ decl,calcMethodLinesV2(M3Model,m @ decl),cyclicCount.complexity,cyclicCount.assertCount> ;
+           }
+      }
+      return aresult ;
+}
+        
+
 void AnalyzeV1(loc location) {
       tuple[int complexity, int assertCount] cyclicCount ;
       
-      int methodCount = 0 ; // Used for debugging only
+      int methodCount = 0 ; 
          
       list[tuple[str name,loc location ,int lines,int ccomplexity,int assertCount]] aresult = [] ; // <Name, location, lines, complexity>
 
       ASTSet  = createAstsFromEclipseProject(location , true) ;
       M3Model = createM3FromEclipseProject(location) ;          
 	  
-      top-down-break visit (ASTSet) {
-               case c:constructor(NAME,_,_,N) : {
-                      methodCount = methodCount + 1  ;  
-                      cyclicCount = countCyclicComplexity(N) ;
-                      aresult = aresult + <NAME,c @ decl,calcMethodLinesV2(M3Model,c @ decl),cyclicCount.complexity,cyclicCount.assertCount> ;
-               }
-               case m:method(_,NAME,_,_,N) : {
-                      methodCount = methodCount + 1  ;        
-                      cyclicCount = countCyclicComplexity(N) ;
-                      aresult = aresult + <NAME,m @ decl,calcMethodLinesV2(M3Model,m @ decl),cyclicCount.complexity,cyclicCount.assertCount> ;
-               }
-      }
+      
       totalLines = countProjectTotalLocV2(M3Model) ;
       totalEmptyLines = countProjectEmptyLocV2(M3Model) ;
       
@@ -81,6 +88,9 @@ void AnalyzeV1(loc location) {
       int unit10plus = 0 ;
       int assertStatements = 0 ;
       
+	  aresult = getCyclic(M3Model,ASTSet) ;	  
+	  methodCount = size(aresult) ;
+            
       if (debug) 
            iprintln(aresult) ;
       
@@ -99,6 +109,7 @@ void AnalyzeV1(loc location) {
       		// Sum assert statements
       		assertStatements += mresult.assertCount ;	 
       }
+      
       int totalUnitLines = 0 ;
       totalUnitLines = lowLines + midLines + complexLines + untestableLines ;
       
@@ -129,19 +140,25 @@ void AnalyzeV1(loc location) {
 		 	
       println("--------------------------- Metrics : Duplicate code -----------------------------------------");
 
+      dupScore = findDuplicatesV2(M3Model) ;
+	  //dupScore= 3  ;
+	  dupRanking = rankDuplicates(dupScore)  ;
+	  println("\n Percentage duplicated code <dupScore>%  ." ) ;
+	  println(" Duplicated code ranking <dupRanking> ." ) ;
 
-	  dupRanking = rankDuplicates(findDuplicatesV2(M3Model))  ;
+	  //dupRanking = "?"   ;
 
       println("--------------------------- Metrics : Unit tests ---------------------------------------------");
 
-	  println("AssertCount <assertStatements> ") ;
+	  //println("AssertCount <assertStatements> ") ;
 	  testRanking = "o" ;
 
       
       println("--------------------------- End report: Sig Maintainability model ----------------------------");
 	  println("\n\t\tVolume\tComplexity\tDuplications\tUnit size\tUnit tests\tSIG MI") ;
 	  
-	  rAvg = rankingAvg([getVolumeRanking(effectiveLinesOfCode),dupRanking,unitRanking,testRanking]) ;
+	  //rAvg = rankingAvg([getVolumeRanking(effectiveLinesOfCode),dupRanking,unitRanking,testRanking]) ;
+	  rAvg = rankingAvg([getVolumeRanking(effectiveLinesOfCode),dupRanking,unitRanking]) ;
 	  println("Analysability\t<getVolumeRanking(effectiveLinesOfCode)>\t  \t\t<dupRanking>\t\t<unitRanking>\t\t<testRanking>\t\t<rAvg>" ) ;
 
 	  rAvg = rankingAvg([complexityRanking,dupRanking]) ;	  
@@ -150,7 +167,8 @@ void AnalyzeV1(loc location) {
 	  rAvg = testRanking ; 
 	  println("Stability\t  \t  \t\t  \t\t  \t\t<testRanking>\t\t<rAvg>" ) ;
 	  
-	  rAvg = rankingAvg([complexityRanking,unitRanking,testRanking]) ;
+	  //rAvg = rankingAvg([complexityRanking,unitRanking,testRanking]) ;
+	  rAvg = rankingAvg([complexityRanking,unitRanking]) ;
 	  println("Testability\t  \t<complexityRanking>\t\t  \t\t<unitRanking>\t\t<testRanking>\t\t<rAvg>" ) ;
 	  
 }
@@ -183,10 +201,10 @@ str rankingAvg(list[str] ranks) {
 }
 
 str getVolumeRanking(int effectiveLinesOfCode) {
-      if(effectiveLinesOfCode    <= 66000)  return "++";
-      else if (effectLinesOfCode <=246000)  return "+";
-      else if (effectLinesOfCode <=665000)  return "o";
-      else if(effectLinesOfCode  <=1310000) return "-";
+      if(effectiveLinesOfCode <= 66000)  return "++";
+      else if (effectiveLinesOfCode <= 246000)  return "+";
+      else if (effectiveLinesOfCode <= 665000)  return "o";
+      else if (effectiveLinesOfCode <= 1310000) return "-";
       return "--";
 }      
    
@@ -248,3 +266,68 @@ int countFileEndLocV2(M3 projectModel, loc cu) {
 }
 
 //|project://smallsql0.21_src|
+// Total execution time 5h5m 
+//--------------------------- Metrics : Unit tests ---------------------------------------------
+//AssertCount 7 
+//--------------------------- End report: Sig Maintainability model ----------------------------
+
+//		            Volume	Complexity	Duplications	Unit size	Unit tests	SIG MI/
+//Analysability	    ++	  		        o		        ++		    o		    +
+//Changeability	  	        -		    o		  		  		 	            o
+//Stability	  	  		  		  		                            o		    o
+//Testability	  	        -		  		            ++		    o		    o
+//ok
+
+
+//=========================== Metrics: Lines ===================================================
+//Lines of Code
+// Total: 299728
+// Total White lines: 56528
+// Effective lines: 169094
+// Total number of methods : 10299
+// Volume score: +
+
+//-------------------------- Metrics : Complexity ---------------------------------------------
+// Low complexity code nr of lines : 99857 
+// Medium complecity code nr of lines : 21073
+// Nr of complex code lines : 15778 
+// Nr of untestable code lines : 13402
+
+// Total nr of executable unit lines : 150110  
+
+// Low complexity code 66 % Mid complexity code 14 % Complex code 10 % Untestable code 8 %
+
+// Complexity score -- .
+//--------------------------- Metrics : Unit size ----------------------------------------------
+
+// Unit size score - .
+//--------------------------- Metrics : Duplicate code -----------------------------------------
+
+// Percentage duplicated code 3%  .
+// Duplicated code ranking ++ .
+//--------------------------- Metrics : Unit tests ---------------------------------------------
+//--------------------------- End report: Sig Maintainability model ----------------------------
+
+//		Volume	Complexity	Duplications	Unit size	Unit tests	SIG MI
+//Analysability	+	  		++		-		o		+
+//Changeability	  	--		++		  		  		o
+//Stability	  	  		  		  		o		o
+//Testability	  	--		  		-		o		-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

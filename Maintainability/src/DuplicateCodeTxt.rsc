@@ -111,9 +111,9 @@ int doItWork(M3 M3Model) {
     workingSet = allCode ;
 
 	for ( str oneLine <- allCode ) {
-		if ( debug ) { 
-			print(".") ;
-	   	    if ( lineCount % 10 == 0 ) println("<lineCount>") ;
+		if ( debug == false ) { 
+			if ( lineCount % 10  == 0 ) print(".") ;
+	   	    if ( lineCount % 100 == 0 ) println("<lineCount>") ;
 			lineCount += 1 ;
 		}	    		    
         ripoff = drop(1,ripoff) ;
@@ -151,55 +151,6 @@ int doItWork(M3 M3Model) {
 		 println("e.g. <size(allCode) - size(workingSet)> lines duplicated." ) ;
      }
      return toInt(round(((allS - WS)/allS) * 100.0)) ;
-}
-
-void doItV2(set[Declaration] ASTSet, M3 M3Model) {
-    list[str] allCode = [];
-    list[str] ripoff ;
-    list[str] p ;
- 
-    int listCount = 0 ;
-    int i = 1 ;
-	    
-    for ( loc  fileLoc <- files(M3Model) ) {
-        list[str] fileContent ;
-	        fileContent = readAndStrip(fileLoc) ;
-	        allCode += fileContent ;
-    } 
-
-	ripoff = allCode ;
-	workingSet = allCode ;
-
-	for ( str oneLine <- allCode ) {
-	  	ripoff = drop(1,ripoff) ;
-	  	cutAgain = true ;
-	  	while ( cutAgain ) {
-	  		i = 5	 ;
-		  	cutAgain = false ;
-	  		if ( findOccurances([oneLine],workingSet) >= 2 ) { 
-  	 			p = [oneLine] ;
-  	 			while ( findOccurances(p,workingSet) >= 2 ) {
-  	 				i+= 1 ;
-  	 				if ( size(ripoff) > i ) {
-  	 					p = [oneLine] + head(ripoff,i) ;
-  	 				}
-  	 				else break ;
-  	 			}
-  	 			if ( i-1 >= 6 )  {
-  	 				x = head(p,i);
-  	 				if ([*L , x , *M , x , *R ] := workingSet)
-						workingSet = L + x + M + R; 
-  	 				cutAgain = true ;
-  	 			}
-	  	  	}
-	  	}
-	  }
-	  real allS = toReal(size(allCode)) ;
-	  real WS = toReal(size(workingSet)) ;
-	  
-	  println("\nPercentage code duplication: <round(((allS - WS)/allS) * 100.0)>%") ;
-	  println("e.g. <size(allCode) - size(workingSet)> lines duplicated." ) ;
-	  return ;
 }
 
 // Note to self in smallsql0 file TestOrderBy.java contains multiple clones.
